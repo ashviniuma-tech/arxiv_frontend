@@ -1,0 +1,11 @@
+# FastAPI and Web Server
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# Data Processing
+pyyaml==6.0.1
+pydantic==2.5.0
+
+# Existing Dependencies (from your mock system)
+# Add any other dependencies your src files need

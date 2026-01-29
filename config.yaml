@@ -1,0 +1,80 @@
+# ArXiv Similarity Search Configuration - MOCK VERSION
+# This config works with mock backend (NO GPU required)
+# Model paths are placeholders - not used in mock mode
+
+# Model Paths (NOT USED IN MOCK - placeholders only)
+models:
+  llm_path: "mock/qwen2.5-14b-instruct"
+  embedding_path: "mock/SemCSE_cosine"
+
+# LLM Configuration (NOT USED IN MOCK)
+llm:
+  tensor_parallel_size: 1
+  gpu_memory_utilization: 0.75
+  max_model_len: 4096
+  dtype: "float16"
+  temperature: 0.2
+  top_p: 0.9
+
+# Keyword Extraction
+keyword_extraction:
+  max_keywords: 5
+  temperature: 0.1
+
+# ArXiv Download
+arxiv:
+  max_results: 20
+
+# PDF Processing
+pdf_processing:
+  chunk_size: 512
+  chunk_overlap: 128
+  min_chunk_length: 50
+
+# Search Configuration
+search:
+  top_k_chunks: 50
+  top_docs: 10
+  batch_size: 16
+
+# Reranking
+reranking:
+  top_k: 5
+  temperature: 0.1
+
+# Reasoning Generation
+reasoning:
+  max_tokens: 2048
+  temperature: 0.4
+
+# Summary Generation
+summary:
+  max_tokens: 3072
+  temperature: 0.2
+  include_methodology: true
+  include_limitations: true
+
+# Paths
+paths:
+  temp_pdfs: "data/temp_pdfs"
+  sample_pdfs: "/home/ps04/Downloads/text_similarity-20260119T064715Z-3-001/text_similarity"  # NEW: Sample PDFs for mock testing
+  faiss_index_dir: "data/faiss_indices"
+  output_dir: "outputs"
+
+# Local Database Configuration
+local_database:
+  folder_path: "/home/ps04/Downloads/text_similarity-20260119T064715Z-3-001/text_similarity"
+  index_cache_path: "data/faiss_indices/local_database.index"
+  metadata_cache_path: "data/faiss_indices/local_database_metadata.json"
+  auto_rebuild: false
+
+# Similarity Search Configuration
+similarity_search:
+  top_k: 10
+
+# Mock Mode Configuration (NEW)
+mock:
+  use_sample_pdfs: true  # Use PDFs from data/sample_pdfs/
+  simulate_delays: true   # Simulate processing time
+  min_delay: 0.3         # Minimum delay in seconds
+  max_delay: 2.0         # Maximum delay in seconds

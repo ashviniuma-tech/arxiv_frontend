@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArXiv Similarity Search - AI-Powered Research Discovery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #adbabe;   
+            --secondary: #4e525838;
+            --success: #059669;    
+            --warning: #d97706;    
+            --danger: #dc2626;     
+            --dark: #111827;       
+            --light: #f9fafb;     
+            --border: #d1d5db;  
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .home-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            background: var(--primary);
+            color: linear-gradient(135deg, var(--primary) 0%);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: none;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .home-button.active {
+            display: flex;
+        }
+
+        .home-button:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .mode-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .mode-online {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .mode-offline {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .header h1 {
+            text-align: center;
+            color: var(--dark);
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            text-align: center;
+            color: #6b7280;
+            font-size: 16px;
+        }
+
+        /* Mode Selection */
+        .mode-selection {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            margin-bottom: 30px;
+        }
+
+        .mode-selection h2 {
+            color: var(--dark);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .mode-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .mode-card {
+            background: var(--light);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .mode-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-color: var(--primary);
+        }
+
+        .mode-card.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .mode-card h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .mode-card p {
+            color: #6b7280;
+            margin-bottom: 15px;
+        }
+
+        .mode-card.active p {
+            color: rgba(255,255,255,0.9);
+        }
+
+        .mode-card .status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-ready {
+            background: rgba(16, 185, 129, 0.2);
+            color: #059669;
+        }
+
+        .mode-card.active .status-ready {
+            background: rgba(255,255,255,0.3);
+            color: white;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .search-section.active {
+            display: block;
+        }
+
+        .search-section h2 {
+            color: var(--dark);
+            margin-bottom: 20px;
+        }
+
+        .search-form {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 150px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--dark);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid var(--light);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--dark);
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .loading-subtext {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        /* Results Section */
+        .results-section {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .keywords-section {
+            background: var(--light);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .keywords-section h3 {
+            color: var(--dark);
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .keyword-tag {
+            background: white;
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 2px solid var(--primary);
+        }
+
+        .metrics-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .papers-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .paper-card {
+            background: var(--light);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .paper-card:hover {
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transform: translateY(-3px);
+        }
+
+        .paper-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .paper-rank {
+            background: var(--primary);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .paper-scores {
+            display: flex;
+            gap: 15px;
+        }
+
+        .score {
+            text-align: center;
+        }
+
+        .score-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        .score-label {
+            font-size: 11px;
+            color: #6b7280;
+            text-transform: uppercase;
+        }
+
+        .paper-title {
+            color: var(--dark);
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .paper-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .paper-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .paper-abstract {
+            color: #4b5563;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .paper-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        /* Analysis Section */
+        .analysis-section {
+            background: #fffbeb;
+            border: 2px solid #fbbf24;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .analysis-section h3 {
+            color: var(--dark);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .analysis-content {
+            color: #374151;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        /* Summary Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: start;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            max-width: 900px;
+            width: 100%;
+            margin: 40px auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            padding: 30px;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+        }
+
+        .modal-header h2 {
+            color: var(--dark);
+            font-size: 24px;
+            flex: 1;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 30px;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .modal-body {
+            padding: 30px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .summary-section {
+            margin-bottom: 30px;
+        }
+
+        .summary-section h3 {
+            color: var(--primary);
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .summary-section p, .summary-section li {
+            color: #374151;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+
+        .summary-section ul {
+            padding-left: 20px;
+        }
+
+        /* Error Messages */
+        .error-message {
+            background: #fee2e2;
+            border: 2px solid #fca5a5;
+            color: #991b1b;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .mode-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-section {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .paper-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <button class="home-button" id="homeButton" onclick="goHome()">
+                 Home
+            </button>
+            <div class="mode-indicator" id="modeIndicator"></div>
+            <h1> Document Similarity Search</h1>
+            <p>AI-Powered Research Paper Discovery & Analysis Engine</p>
+        </div>
+
+        <!-- Mode Selection -->
+        <div class="mode-selection" id="modeSelection">
+            <h2>Select Search Mode</h2>
+            <div class="mode-buttons">
+                <div class="mode-card" onclick="selectMode('arxiv')">
+                    <h3> ArXiv Mode</h3>
+                    <p>Search from ArXiv repository</p>
+                    <span class="status status-ready">ONLINE</span>
+                </div>
+                <div class="mode-card" onclick="selectMode('local')">
+                    <h3> Local Database</h3>
+                    <p>Search from your local papers</p>
+                    <span class="status status-ready">OFFLINE</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section" id="searchSection">
+            <h2>Enter Research Abstract</h2>
+            <div class="error-message" id="errorMessage"></div>
+            
+            <form class="search-form" onsubmit="handleSearch(event)">
+                <div class="form-group">
+                    <label for="abstractInput">Paste your research abstract below (minimum 50 characters):</label>
+                    <textarea 
+                        id="abstractInput" 
+                        placeholder="Enter your research abstract here. The abstract should clearly describe the research problem, methodology, and main contributions of your work..."
+                        oninput="updateCharCount()"
+                    ></textarea>
+                    <div class="char-count" id="charCount">0 characters</div>
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="btn btn-primary" id="searchBtn">
+                         Search Similar Papers
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="resetSearch()">
+                         New Search
+                    </button>
+                </div>
+            </form>
+
+            <div class="loading" id="loadingSection">
+                <div class="spinner"></div>
+                <div class="loading-text" id="loadingText">Analyzing your abstract...</div>
+                <div class="loading-subtext" id="loadingSubtext">This may take a few moments</div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection">
+            <h2>Search Results</h2>
+            
+            <div class="keywords-section">
+                <h3> Extracted Keywords</h3>
+                <div class="keywords" id="keywordsContainer"></div>
+            </div>
+
+            <div class="metrics-section" id="metricsSection"></div>
+
+            <h3 style="margin-bottom: 20px;">Top 5 Similar Papers</h3>
+            <div class="papers-grid" id="papersGrid"></div>
+
+            <div class="analysis-section" id="analysisSection" style="display: none;">
+                <h3> Comparative Analysis</h3>
+                <div class="analysis-content" id="analysisContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Modal -->
+    <div class="modal" id="summaryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Paper Summary</h2>
+                <button class="modal-close" onclick="closeSummaryModal()">×</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <div class="loading" id="summaryLoading">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Generating detailed summary...</div>
+                </div>
+                <div id="summaryContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = null;
+        let currentSessionId = null;
+        let currentResults = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadConfig();
+        });
+
+        async function loadConfig() {
+            try {
+                const response = await fetch('/api/config');
+                const config = await response.json();
+                console.log('Config loaded:', config);
+            } catch (error) {
+                console.error('Failed to load config:', error);
+            }
+        }
+
+        function selectMode(mode) {
+            currentMode = mode;
+            
+            // Update UI
+            document.querySelectorAll('.mode-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            event.target.closest('.mode-card').classList.add('active');
+            
+            // Update mode indicator
+            const indicator = document.getElementById('modeIndicator');
+            indicator.className = 'mode-indicator ' + (mode === 'arxiv' ? 'mode-online' : 'mode-offline');
+            indicator.textContent = mode === 'arxiv' ? 'ONLINE' : 'OFFLINE';
+            
+            // Show home button
+            document.getElementById('homeButton').classList.add('active');
+            
+            // Show search section
+            setTimeout(() => {
+                document.getElementById('modeSelection').style.display = 'none';
+                document.getElementById('searchSection').classList.add('active');
+                document.getElementById('abstractInput').focus();
+            }, 300);
+        }
+
+        function goHome() {
+            // Reset everything
+            currentMode = null;
+            currentSessionId = null;
+            currentResults = null;
+            
+            // Clear form
+            document.getElementById('abstractInput').value = '';
+            updateCharCount();
+            
+            // Hide all sections
+            document.getElementById('searchSection').classList.remove('active');
+            document.getElementById('resultsSection').classList.remove('active');
+            document.getElementById('homeButton').classList.remove('active');
+            
+            // Clear mode indicator
+            document.getElementById('modeIndicator').textContent = '';
+            document.getElementById('modeIndicator').className = 'mode-indicator';
+            
+            // Show mode selection
+            document.getElementById('modeSelection').style.display = 'block';
+            
+            // Remove active class from mode cards
+            document.querySelectorAll('.mode-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateCharCount() {
+            const input = document.getElementById('abstractInput');
+            const count = input.value.length;
+            const charCount = document.getElementById('charCount');
+            charCount.textContent = `${count} characters`;
+            charCount.style.color = count >= 50 ? '#10b981' : '#6b7280';
+        }
+
+        async function handleSearch(event) {
+            event.preventDefault();
+            
+            const abstractInput = document.getElementById('abstractInput');
+            const abstract = abstractInput.value.trim();
+            
+            // Validate
+            if (abstract.length < 50) {
+                showError('Abstract must be at least 50 characters long.');
+                return;
+            }
+            
+            hideError();
+            
+            // Show loading
+            document.getElementById('searchBtn').disabled = true;
+            document.getElementById('loadingSection').classList.add('active');
+            document.getElementById('resultsSection').classList.remove('active');
+            
+            const loadingSteps = [
+                'Extracting keywords from your abstract...',
+                currentMode === 'arxiv' ? 'Searching ArXiv repository...' : 'Searching local database...',
+                'Computing semantic similarities...',
+                'Reranking with AI model...',
+                'Generating comparative analysis...'
+            ];
+            
+            let stepIndex = 0;
+            const stepInterval = setInterval(() => {
+                if (stepIndex < loadingSteps.length) {
+                    document.getElementById('loadingText').textContent = loadingSteps[stepIndex];
+                    stepIndex++;
+                }
+            }, 2000);
+            
+            try {
+                const response = await fetch('/api/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        mode: currentMode,
+                        abstract: abstract
+                    })
+                });
+                
+                clearInterval(stepInterval);
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Search failed');
+                }
+                
+                const results = await response.json();
+                currentSessionId = results.session_id;
+                currentResults = results;
+                
+                displayResults(results);
+                
+            } catch (error) {
+                clearInterval(stepInterval);
+                showError(error.message);
+                console.error('Search error:', error);
+            } finally {
+                document.getElementById('searchBtn').disabled = false;
+                document.getElementById('loadingSection').classList.remove('active');
+            }
+        }
+
+        function displayResults(results) {
+            // Display keywords
+            const keywordsContainer = document.getElementById('keywordsContainer');
+            keywordsContainer.innerHTML = '';
+            (results.keywords || []).forEach(keyword => {
+                const tag = document.createElement('span');
+                tag.className = 'keyword-tag';
+                tag.textContent = keyword;
+                keywordsContainer.appendChild(tag);
+            });
+            
+            // Display metrics
+            const metricsSection = document.getElementById('metricsSection');
+            metricsSection.innerHTML = `
+                <div class="metric-card">
+                    <div class="metric-value">${results.top_5_papers.length}</div>
+                    <div class="metric-label">Top Papers</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">${results.metrics.total_pipeline_time}s</div>
+                    <div class="metric-label">Total Time</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">${results.metrics.search_time}s</div>
+                    <div class="metric-label">Search Time</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">${results.metrics.rerank_time}s</div>
+                    <div class="metric-label">Rerank Time</div>
+                </div>
+            `;
+            
+            // Display papers
+            const papersGrid = document.getElementById('papersGrid');
+            papersGrid.innerHTML = '';
+            
+            results.top_5_papers.forEach((paper, index) => {
+                const paperCard = document.createElement('div');
+                paperCard.className = 'paper-card';
+                paperCard.innerHTML = `
+                    <div class="paper-header">
+                        <div class="paper-rank">${paper.rank}</div>
+                        <div class="paper-scores">
+                            <div class="score">
+                                <div class="score-value">${paper.similarity}%</div>
+                                <div class="score-label">Similarity</div>
+                            </div>
+                            <div class="score">
+                                <div class="score-value">${paper.rerank_score}</div>
+                                <div class="score-label">Rerank</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="paper-title">${paper.title}</div>
+                    
+                    <div class="paper-meta">
+                        <span> ${paper.authors.slice(0, 3).join(', ')}${paper.authors.length > 3 ? ' et al.' : ''}</span>
+                        <span> ${paper.year}</span>
+                        ${paper.arxiv_id !== 'N/A' ? `<span>🔗 ${paper.arxiv_id}</span>` : ''}
+                    </div>
+                    
+                    <div class="paper-abstract">${paper.abstract}</div>
+                    
+                    <div class="paper-actions">
+                        <button class="btn btn-primary btn-small" onclick="generateSummary(${index + 1})">
+                             View Summary
+                        </button>
+                        ${paper.url ? `<button class="btn btn-secondary btn-small" onclick="window.open('${paper.url}', '_blank')">🔗 View Paper</button>` : ''}
+                    </div>
+                `;
+                papersGrid.appendChild(paperCard);
+            });
+            
+            // Display comparative analysis
+            if (results.comparative_analysis) {
+                document.getElementById('analysisSection').style.display = 'block';
+                document.getElementById('analysisContent').textContent = results.comparative_analysis;
+            }
+            
+            // Show results section
+            document.getElementById('resultsSection').classList.add('active');
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function generateSummary(paperIndex) {
+            if (!currentSessionId) {
+                showError('No active session. Please search first.');
+                return;
+            }
+            
+            // Show modal
+            document.getElementById('summaryModal').classList.add('active');
+            document.getElementById('summaryLoading').classList.add('active');
+            document.getElementById('summaryContent').innerHTML = '';
+            
+            try {
+                const response = await fetch('/api/summary', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        mode: currentMode,
+                        paper_index: paperIndex,
+                        session_id: currentSessionId
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Summary generation failed');
+                }
+                
+                const data = await response.json();
+                displaySummary(data);
+                
+            } catch (error) {
+                showError(error.message);
+                closeSummaryModal();
+                console.error('Summary error:', error);
+            } finally {
+                document.getElementById('summaryLoading').classList.remove('active');
+            }
+        }
+
+        function displaySummary(data) {
+            const { paper, summary } = data;
+            
+            document.getElementById('modalTitle').textContent = paper.title;
+            
+            const summaryHtml = `
+                <div class="summary-section">
+                    <h3> Research Objective</h3>
+                    <p>${summary.research_objective}</p>
+                </div>
+                
+                <div class="summary-section">
+                    <h3> Methodology Summary</h3>
+                    <p>${summary.methodology_summary}</p>
+                </div>
+                
+                <div class="summary-section">
+                    <h3> Key Findings</h3>
+                    <ul>
+                        ${summary.key_findings.map(finding => `<li>${finding}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="summary-section">
+                    <h3> Innovation and Contribution</h3>
+                    <p>${summary.innovation_and_contribution}</p>
+                </div>
+                
+                <div class="summary-section">
+                    <h3> Technical Details</h3>
+                    <p>${summary.technical_details}</p>
+                </div>
+                
+                ${summary.limitations_and_future_work ? `
+                <div class="summary-section">
+                    <h3> Limitations and Future Work</h3>
+                    <p>${summary.limitations_and_future_work}</p>
+                </div>
+                ` : ''}
+            `;
+            
+            document.getElementById('summaryContent').innerHTML = summaryHtml;
+        }
+
+        function closeSummaryModal() {
+            document.getElementById('summaryModal').classList.remove('active');
+        }
+
+        function resetSearch() {
+            document.getElementById('abstractInput').value = '';
+            updateCharCount();
+            document.getElementById('resultsSection').classList.remove('active');
+            currentSessionId = null;
+            currentResults = null;
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.classList.add('active');
+            setTimeout(() => {
+                errorEl.classList.remove('active');
+            }, 5000);
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').classList.remove('active');
+        }
+
+        // Close modal on outside click
+        document.getElementById('summaryModal').addEventListener('click', (e) => {
+            if (e.target.id === 'summaryModal') {
+                closeSummaryModal();
+            }
+        });
+    </script>
+</body>
+</html>
